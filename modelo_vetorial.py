@@ -60,3 +60,25 @@ resultados = pd.DataFrame({
 print("Resultados ranqueados por similaridade:")
 print(resultados)
 print("\n")
+
+# Para entender melhor as relações entre os documentos, pode-se calcular a similaridade entre todos os pares de documentos:
+# Calcular similaridade entre todos os documentos
+sim_entre_docs = cosine_similarity(X)
+
+# Visualizar como matriz
+df_sim = pd.DataFrame(
+    sim_entre_docs, 
+    columns=nomes_docs, 
+    index=nomes_docs
+)
+
+print("Similaridade entre documentos:")
+print(df_sim)
+print("\n")
+
+# Encontrar os pares mais similares
+print("Pares de documentos mais similares:")
+for i in range(len(nomes_docs)):
+    for j in range(i+1, len(nomes_docs)):
+        print(f"{nomes_docs[i]} x {nomes_docs[j]}: {sim_entre_docs[i,j]:.4f}")
+
