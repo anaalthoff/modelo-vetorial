@@ -82,3 +82,35 @@ for i in range(len(nomes_docs)):
     for j in range(i+1, len(nomes_docs)):
         print(f"{nomes_docs[i]} x {nomes_docs[j]}: {sim_entre_docs[i,j]:.4f}")
 
+# Para entender profundamente o que está acontecendo, segue implementação da similaridade por cosseno manualmente:
+def cosseno_manual(v1, v2):
+    """
+    Calcula a similaridade por cosseno entre dois vetores manualmente.
+    """
+    # Converter para arrays numpy se necessário
+    v1 = np.array(v1).flatten()
+    v2 = np.array(v2).flatten()
+    
+    # Produto escalar
+    produto_escalar = np.dot(v1, v2)
+    
+    # Normas (comprimentos)
+    norma_v1 = np.sqrt(np.sum(v1**2))
+    norma_v2 = np.sqrt(np.sum(v2**2))
+    
+    # Evitar divisão por zero
+    if norma_v1 == 0 or norma_v2 == 0:
+        return 0
+    
+    # Cosseno
+    return produto_escalar / (norma_v1 * norma_v2)
+
+# Testar com nossos dados
+X_denso = X.toarray()
+consulta_denso = consulta_vetor.toarray()[0]
+
+print("Verificação manual dos resultados:")
+for i, doc in enumerate(nomes_docs):
+    sim_manual = cosseno_manual(consulta_denso, X_denso[i])
+    sim_sklearn = similaridades[i]
+    print(f"{doc}: manual = {sim_manual:.6f}, sklearn = {sim_sklearn:.6f}, diferença = {abs(sim_manual - sim_sklearn):.10f}")
