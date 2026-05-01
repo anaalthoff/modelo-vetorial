@@ -1,0 +1,17 @@
+# Ambiente virtual
+.venv/
+venv/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Node (sobras do npm install errado)
+node_modules/
+package.json
+package-lock.json
+
+# IDE
+.vscode/
+.idea/
