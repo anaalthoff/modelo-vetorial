@@ -44,7 +44,8 @@ consulta = "ciência dados"
 consulta_vetor = vectorizer.transform([consulta])
 
 print("Vetor da consulta:")
-print(pd.DataFrame(consulta_vetor.toarray(), columns=termos, index=["consulta"]))
+print(pd.DataFrame(consulta_vetor.toarray(),
+      columns=termos, index=["consulta"]))
 print("\n")
 
 # Calcular similaridade por cosseno entre a consulta e todos os documentos
@@ -67,8 +68,8 @@ sim_entre_docs = cosine_similarity(X)
 
 # Visualizar como matriz
 df_sim = pd.DataFrame(
-    sim_entre_docs, 
-    columns=nomes_docs, 
+    sim_entre_docs,
+    columns=nomes_docs,
     index=nomes_docs
 )
 
@@ -80,9 +81,11 @@ print("\n")
 print("Pares de documentos mais similares:")
 for i in range(len(nomes_docs)):
     for j in range(i+1, len(nomes_docs)):
-        print(f"{nomes_docs[i]} x {nomes_docs[j]}: {sim_entre_docs[i,j]:.4f}")
+        print(f"{nomes_docs[i]} x {nomes_docs[j]}: {sim_entre_docs[i, j]:.4f}")
 
 # Para entender profundamente o que está acontecendo, segue implementação da similaridade por cosseno manualmente:
+
+
 def cosseno_manual(v1, v2):
     """
     Calcula a similaridade por cosseno entre dois vetores manualmente.
@@ -90,20 +93,21 @@ def cosseno_manual(v1, v2):
     # Converter para arrays numpy se necessário
     v1 = np.array(v1).flatten()
     v2 = np.array(v2).flatten()
-    
+
     # Produto escalar
     produto_escalar = np.dot(v1, v2)
-    
+
     # Normas (comprimentos)
     norma_v1 = np.sqrt(np.sum(v1**2))
     norma_v2 = np.sqrt(np.sum(v2**2))
-    
+
     # Evitar divisão por zero
     if norma_v1 == 0 or norma_v2 == 0:
         return 0
-    
+
     # Cosseno
     return produto_escalar / (norma_v1 * norma_v2)
+
 
 # Testar com nossos dados
 X_denso = X.toarray()
@@ -114,3 +118,12 @@ for i, doc in enumerate(nomes_docs):
     sim_manual = cosseno_manual(consulta_denso, X_denso[i])
     sim_sklearn = similaridades[i]
     print(f"{doc}: manual = {sim_manual:.6f}, sklearn = {sim_sklearn:.6f}, diferença = {abs(sim_manual - sim_sklearn):.10f}")
+
+# Exemplo com remoção de stopwords
+vectorizer_sem_stopwords = CountVectorizer(stop_words=['de', 'para'])
+X_sem_stop = vectorizer_sem_stopwords.fit_transform(documentos)
+
+# Comparar os vocabulários
+print("Vocabulário completo:", termos)
+print("Vocabulário sem stopwords:",
+      vectorizer_sem_stopwords.get_feature_names_out())
