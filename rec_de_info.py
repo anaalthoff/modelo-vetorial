@@ -125,3 +125,83 @@ for interp in set(interpretacoes):
     print(f"\n{interp}:")
     for i in indices:
         print(f"  Similaridade: {sim_amb[i]:.4f} | {documentos_ambiguidade[i]}")
+
+# ============================================
+# PARTE 4: VISUALIZAÇÃO INTEGRADA
+# ============================================
+print("\n" + "="*80)
+print("PARTE 4: VISUALIZAÇÃO INTEGRADA")
+print("="*80)
+
+# Combinar todos os documentos para visualização
+todos_documentos = (
+    documentos_sinonimia + 
+    documentos_polissemia + 
+    documentos_ambiguidade
+)
+
+todas_consultas = [consulta_sinonimia, consulta_polissemia, consulta_ambiguidade]
+emb_todas_consultas = model.encode(todas_consultas)
+emb_todos_docs = model.encode(todos_documentos)
+
+# Reduzir dimensionalidade para visualização
+pca = PCA(n_components=2)
+todos_embeddings = np.vstack([emb_todas_consultas, emb_todos_docs])
+embeddings_2d = pca.fit_transform(todos_embeddings)
+
+# Separar consultas e documentos
+consultas_2d = embeddings_2d[:3]
+documentos_2d = embeddings_2d[3:]
+
+# Criar rótulos para cores
+cores_docs = []
+for i, doc in enumerate(todos_documentos):
+    if i < len(documentos_sinonimia):
+        cores_docs.append('blue')  # Sinonímia
+    elif i < len(documentos_sinonimia) + len(documentos_polissemia):
+        cores_docs.append('green')  # Polissemia
+    else:
+        cores_docs.append('orange')  # Ambiguidade
+
+# Plotar
+plt.figure(figsize=(14, 10))
+
+# Documentos
+scatter = plt.scatter(documentos_2d[:, 0], documentos_2d[:, 1], 
+                      c=cores_docs, s=100, alpha=0.6, edgecolors='black', linewidth=1)
+
+# Consultas (destacadas)
+cores_consulta = ['red', 'red', 'red']
+plt.scatter(consultas_2d[:, 0], consultas_2d[:, 1], 
+            c='red', s=300, marker='*', edgecolors='black', 
+            linewidth=2, label='Consultas')
+
+# Adicionar rótulos para consultas
+for i, consulta in enumerate(todas_consultas):
+    plt.annotate(f'Consulta {i+1}: "{consulta}"', 
+                (consultas_2d[i, 0], consultas_2d[i, 1]),
+                xytext=(10, 10), textcoords='offset points', 
+                fontsize=10, fontweight='bold')
+
+# Adicionar alguns rótulos para documentos representativos
+indices_destaque = [0, 3, 6, 8, 10, 12]  # Índices de documentos representativos
+for idx in indices_destaque:
+    plt.annotate(f'D{idx+1}', (documentos_2d[idx, 0], documentos_2d[idx, 1]),
+                xytext=(5, 5), textcoords='offset points', fontsize=8)
+
+# Legenda
+from matplotlib.patches import Patch
+legend_elements = [
+    Patch(facecolor='blue', alpha=0.6, label='Sinonímia'),
+    Patch(facecolor='green', alpha=0.6, label='Polissemia'),
+    Patch(facecolor='orange', alpha=0.6, label='Ambiguidade'),
+    Patch(facecolor='red', alpha=1.0, label='Consultas')
+]
+plt.legend(handles=legend_elements, loc='upper right')
+
+plt.xlabel('Componente Principal 1')
+plt.ylabel('Componente Principal 2')
+plt.title('Espaço Semântico: Problemas Clássicos da RI')
+plt.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.show()
