@@ -84,3 +84,44 @@ for sentido in set(sentidos):
     print(f"\n{sentido}:")
     for i in indices:
         print(f"  Similaridade: {sim_pol[i]:.4f} | {documentos_polissemia[i]}")
+
+# ============================================
+# PARTE 3: AMBIGUIDADE
+# ============================================
+print("\n" + "="*80)
+print("PARTE 3: PROBLEMA DA AMBIGUIDADE")
+print("="*80)
+
+consulta_ambiguidade = "banco"
+
+documentos_ambiguidade = [
+    # Interpretação 1: Instituição financeira
+    "O Banco Central anunciou nova taxa de juros",
+    "Como abrir uma conta corrente em banco digital",
+    
+    # Interpretação 2: Assento
+    "Banco de madeira maciça para jardim",
+    "Como restaurar bancos antigos de praça",
+    
+    # Interpretação 3: Banco de dados
+    "Introdução a bancos de dados relacionais",
+    "Bancos de dados NoSQL: MongoDB e Cassandra"
+]
+
+interpretacoes = ["Financeiro"] * 2 + ["Assento"] * 2 + ["Dados"] * 2
+
+# Criar embeddings
+emb_consulta_amb = model.encode([consulta_ambiguidade])
+emb_docs_amb = model.encode(documentos_ambiguidade)
+
+# Calcular similaridades
+sim_amb = cosine_similarity(emb_consulta_amb, emb_docs_amb)[0]
+
+print(f"\nConsulta: '{consulta_ambiguidade}' (ambígua)")
+print("\nResultados por interpretação:")
+
+for interp in set(interpretacoes):
+    indices = [i for i, s in enumerate(interpretacoes) if s == interp]
+    print(f"\n{interp}:")
+    for i in indices:
+        print(f"  Similaridade: {sim_amb[i]:.4f} | {documentos_ambiguidade[i]}")
