@@ -205,3 +205,76 @@ plt.title('Espaço Semântico: Problemas Clássicos da RI')
 plt.grid(True, alpha=0.3)
 plt.tight_layout()
 plt.show()
+
+# ============================================
+# PARTE 5: DESAMBIGUAÇÃO POR CONTEXTO
+# ============================================
+print("\n" + "="*80)
+print("PARTE 5: DESAMBIGUAÇÃO POR CONTEXTO")
+print("="*80)
+
+# Testar consultas contextualizadas para o termo ambíguo "banco"
+consultas_contextuais = [
+    "banco juros",      # Contexto financeiro
+    "banco investimentos",  # Contexto financeiro
+    "banco madeira",    # Contexto assento
+    "banco jardim",     # Contexto assento
+    "banco dados",      # Contexto banco de dados
+    "banco SQL"         # Contexto banco de dados
+]
+
+print("Comparação de similaridades para consultas contextualizadas:")
+print("-"*80)
+
+for consulta_ctx in consultas_contextuais:
+    emb_ctx = model.encode([consulta_ctx])
+    sim_ctx = cosine_similarity(emb_ctx, emb_docs_amb)[0]
+    
+    # Média por interpretação
+    medias = {}
+    for interp in set(interpretacoes):
+        indices = [i for i, s in enumerate(interpretacoes) if s == interp]
+        medias[interp] = np.mean([sim_ctx[i] for i in indices])
+    
+    # Identificar interpretação predominante
+    interp_pred = max(medias, key=medias.get)
+    confianca = medias[interp_pred] / sum(medias.values())
+    
+    print(f"\nConsulta: '{consulta_ctx}'")
+    for interp in medias:
+        print(f"  {interp}: {medias[interp]:.4f}")
+    print(f"  → Predominante: {interp_pred} (confiança: {confianca:.2%})")
+
+# ============================================
+# PARTE 6: DISCUSSÃO DOS RESULTADOS
+# ============================================
+print("\n" + "="*80)
+print("DISCUSSÃO DOS RESULTADOS")
+print("="*80)
+print("""
+SINONÍMIA:
+- Documentos com sinônimos ("automóvel", "veículo") alcançam similaridades significativas
+- Em sistemas puramente lexicais, estes documentos receberiam similaridade ZERO
+- Embeddings capturam relações semânticas entre termos diferentes mas relacionados
+
+POLISSEMIA:
+- A consulta "manga" produz similaridades distribuídas entre os três sentidos
+- Nenhum sentido domina claramente, refletindo a ambiguidade do termo
+- A desambiguação requer contexto adicional
+
+AMBIGUIDADE:
+- A consulta "banco" também produz similaridades distribuídas
+- Na projeção 2D, a consulta posiciona-se entre os agrupamentos de documentos
+- Consultas contextualizadas direcionam a busca para a interpretação desejada
+
+DESAMBIGUAÇÃO POR CONTEXTO:
+- "banco juros" e "banco investimentos" favorecem interpretação financeira
+- "banco madeira" e "banco jardim" favorecem assentos
+- "banco dados" e "banco SQL" favorecem banco de dados
+- A confiança na interpretação correta aumenta significativamente com contexto adequado
+
+LIMITAÇÕES PERSISTENTES:
+- Embeddings não eliminam completamente a vantagem dos termos exatos
+- Contexto insuficiente pode não resolver ambiguidades
+- Sentidos raros podem ser sub-representados nos dados de treinamento
+""")
